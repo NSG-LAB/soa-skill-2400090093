@@ -1,0 +1,3 @@
+com/soa/order/OrderServiceApplication.class
+com/soa/order/controller/OrderController.class
+com/soa/order/model/Order.class

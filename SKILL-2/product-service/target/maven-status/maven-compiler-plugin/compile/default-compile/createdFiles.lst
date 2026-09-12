@@ -1,0 +1,3 @@
+com/soa/product/model/Product.class
+com/soa/product/ProductServiceApplication.class
+com/soa/product/controller/ProductController.class

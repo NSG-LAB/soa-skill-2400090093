@@ -1,0 +1,7 @@
+com/example/userservice/controller/UserController.class
+com/example/userservice/entity/User.class
+com/example/userservice/repository/UserRepository.class
+com/example/userservice/exception/GlobalExceptionHandler.class
+com/example/userservice/UserRegistrationApplication.class
+com/example/userservice/service/UserService.class
+com/example/userservice/controller/UserController$LoginRequest.class

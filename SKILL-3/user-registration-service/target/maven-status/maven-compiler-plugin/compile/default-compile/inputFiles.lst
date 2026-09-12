@@ -1,0 +1,6 @@
+/home/nsg/Projects/SOA/SKILL-3/user-registration-service/src/main/java/com/example/userservice/UserRegistrationApplication.java
+/home/nsg/Projects/SOA/SKILL-3/user-registration-service/src/main/java/com/example/userservice/controller/UserController.java
+/home/nsg/Projects/SOA/SKILL-3/user-registration-service/src/main/java/com/example/userservice/entity/User.java
+/home/nsg/Projects/SOA/SKILL-3/user-registration-service/src/main/java/com/example/userservice/exception/GlobalExceptionHandler.java
+/home/nsg/Projects/SOA/SKILL-3/user-registration-service/src/main/java/com/example/userservice/repository/UserRepository.java
+/home/nsg/Projects/SOA/SKILL-3/user-registration-service/src/main/java/com/example/userservice/service/UserService.java
