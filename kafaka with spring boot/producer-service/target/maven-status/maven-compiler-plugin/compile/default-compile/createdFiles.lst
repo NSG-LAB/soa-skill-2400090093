@@ -1,0 +1,3 @@
+com/example/producer/ProducerApplication.class
+com/example/producer/ProducerController.class
+com/example/producer/KafkaProducer.class
