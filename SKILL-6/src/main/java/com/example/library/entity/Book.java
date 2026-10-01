@@ -2,6 +2,7 @@ package com.example.library.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.ISBN;
 
 @Entity
 @Table(name = "books")
@@ -20,14 +21,32 @@ public class Book {
     private String author;
 
     @NotBlank(message = "ISBN is required")
+    @ISBN(type = ISBN.Type.ANY, message = "Invalid ISBN format")
     @Column(nullable = false, unique = true)
     private String isbn;
 
     public Book() {
     }
 
+    public Book(String title, String author, String isbn) {
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+    }
+
+    public Book(Long id, String title, String author, String isbn) {
+        this.id = id;
+        this.title = title;
+        this.author = author;
+        this.isbn = isbn;
+    }
+
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getTitle() {
