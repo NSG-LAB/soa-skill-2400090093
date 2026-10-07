@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOA TaskFlow — Task Manager Microservice</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Navigation Bar -->
+        <header class="app-header">
+            <div class="brand">
+                <div class="logo-icon">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    </svg>
+                </div>
+                <div class="brand-text">
+                    <h1>TaskFlow <span>SOA</span></h1>
+                    <span class="brand-subtitle">Service-Oriented Task Manager Microservice</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <div class="server-status-badge" id="serverStatusBadge">
+                    <span class="status-dot"></span>
+                    <span class="status-label">API Connected</span>
+                    <span class="port-tag">:8090</span>
+                </div>
+
+                <button class="btn btn-outline" id="apiPlaygroundBtn" title="Interactive REST API Explorer">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="16 18 22 12 16 6"></polyline>
+                        <polyline points="8 6 2 12 8 18"></polyline>
+                    </svg>
+                    <span>REST API</span>
+                </button>
+
+                <button class="theme-toggle" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+                    <svg class="sun-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <svg class="moon-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                </button>
+
+                <button class="btn btn-primary" id="openCreateModalBtn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="12" y1="5" x2="12" y2="19"></line>
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                    </svg>
+                    <span>Create Task</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Metrics & Stats Overview -->
+        <section class="stats-grid">
+            <div class="stat-card" data-filter-status="ALL">
+                <div class="stat-icon total-icon">📋</div>
+                <div class="stat-details">
+                    <span class="stat-label">Total Tasks</span>
+                    <span class="stat-value" id="statTotal">0</span>
+                </div>
+            </div>
+            <div class="stat-card" data-filter-status="IN_PROGRESS">
+                <div class="stat-icon progress-icon">⚡</div>
+                <div class="stat-details">
+                    <span class="stat-label">In Progress</span>
+                    <span class="stat-value" id="statInProgress">0</span>
+                </div>
+            </div>
+            <div class="stat-card" data-filter-status="COMPLETED">
+                <div class="stat-icon completed-icon">✅</div>
+                <div class="stat-details">
+                    <span class="stat-label">Completed</span>
+                    <span class="stat-value" id="statCompleted">0</span>
+                </div>
+            </div>
+            <div class="stat-card stat-card-alert" id="overdueCard">
+                <div class="stat-icon overdue-icon">⚠️</div>
+                <div class="stat-details">
+                    <span class="stat-label">Overdue Tasks</span>
+                    <span class="stat-value" id="statOverdue">0</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Controls, Search, and Filtering Bar -->
+        <section class="controls-bar">
+            <div class="search-box">
+                <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" id="searchInput" placeholder="Search tasks by title or description..." autocomplete="off">
+                <button class="search-clear-btn" id="searchClearBtn" title="Clear search">&times;</button>
+            </div>
+
+            <div class="filters-group">
+                <!-- Status Filter Pills -->
+                <div class="filter-pills" id="statusFilterPills">
+                    <button class="pill active" data-status="">All</button>
+                    <button class="pill" data-status="TODO">To Do</button>
+                    <button class="pill" data-status="IN_PROGRESS">In Progress</button>
+                    <button class="pill" data-status="COMPLETED">Completed</button>
+                </div>
+
+                <!-- Priority Select -->
+                <select id="priorityFilterSelect" class="custom-select" title="Filter by priority">
+                    <option value="">All Priorities</option>
+                    <option value="URGENT">🔥 Urgent</option>
+                    <option value="HIGH">⚡ High</option>
+                    <option value="MEDIUM">🔹 Medium</option>
+                    <option value="LOW">☕ Low</option>
+                </select>
+
+                <!-- Category Select -->
+                <select id="categoryFilterSelect" class="custom-select" title="Filter by category">
+                    <option value="">All Categories</option>
+                </select>
+
+                <!-- View Switcher -->
+                <div class="view-switch" id="viewSwitch">
+                    <button class="view-btn active" id="kanbanViewBtn" title="Board View">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="5" height="18" rx="1"></rect>
+                            <rect x="10" y="3" width="5" height="12" rx="1"></rect>
+                            <rect x="17" y="3" width="5" height="15" rx="1"></rect>
+                        </svg>
+                        <span>Board</span>
+                    </button>
+                    <button class="view-btn" id="listViewBtn" title="List View">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"></line>
+                            <line x1="8" y1="12" x2="21" y2="12"></line>
+                            <line x1="8" y1="18" x2="21" y2="18"></line>
+                            <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                            <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                            <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                        </svg>
+                        <span>List</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Task Views -->
+        <main class="main-content">
+            <!-- Kanban Board View -->
+            <div class="kanban-view" id="kanbanView">
+                <div class="kanban-column" id="colTodo" data-status="TODO">
+                    <div class="column-header">
+                        <div class="col-title-group">
+                            <span class="status-indicator indicator-todo"></span>
+                            <h2>To Do</h2>
+                        </div>
+                        <span class="column-counter" id="countTodo">0</span>
+                    </div>
+                    <div class="task-list" id="listTodo">
+                        <!-- Tasks dynamically injected -->
+                    </div>
+                </div>
+
+                <div class="kanban-column" id="colInProgress" data-status="IN_PROGRESS">
+                    <div class="column-header">
+                        <div class="col-title-group">
+                            <span class="status-indicator indicator-inprogress"></span>
+                            <h2>In Progress</h2>
+                        </div>
+                        <span class="column-counter" id="countInProgress">0</span>
+                    </div>
+                    <div class="task-list" id="listInProgress">
+                        <!-- Tasks dynamically injected -->
+                    </div>
+                </div>
+
+                <div class="kanban-column" id="colCompleted" data-status="COMPLETED">
+                    <div class="column-header">
+                        <div class="col-title-group">
+                            <span class="status-indicator indicator-completed"></span>
+                            <h2>Completed</h2>
+                        </div>
+                        <span class="column-counter" id="countCompleted">0</span>
+                    </div>
+                    <div class="task-list" id="listCompleted">
+                        <!-- Tasks dynamically injected -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table/List View -->
+            <div class="table-view hidden" id="tableView">
+                <div class="table-container">
+                    <table class="tasks-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 48px;"></th>
+                                <th>Task Title</th>
+                                <th>Category</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Due Date</th>
+                                <th style="text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            <!-- Tasks rows injected -->
+                        </tbody>
+                    </table>
+                    <div class="table-empty hidden" id="tableEmptyState">
+                        <p>No tasks found matching your filters.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create / Edit Task Modal -->
+    <div class="modal-overlay hidden" id="taskModalOverlay">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <h3 id="modalTitle">Create New Task</h3>
+                <button class="modal-close-btn" id="modalCloseBtn">&times;</button>
+            </div>
+            <form id="taskForm" class="modal-body">
+                <input type="hidden" id="taskIdInput">
+
+                <div class="form-group">
+                    <label for="taskTitleInput">Title <span class="required">*</span></label>
+                    <input type="text" id="taskTitleInput" class="form-control" placeholder="e.g., Integrate Kafka messaging broker" required minlength="3" maxlength="150">
+                    <div class="form-error" id="titleError"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="taskDescriptionInput">Description</label>
+                    <textarea id="taskDescriptionInput" class="form-control" rows="3" placeholder="Provide details, acceptance criteria, or notes..." maxlength="1000"></textarea>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-half">
+                        <label for="taskStatusSelect">Status</label>
+                        <select id="taskStatusSelect" class="form-control">
+                            <option value="TODO">To Do</option>
+                            <option value="IN_PROGRESS">In Progress</option>
+                            <option value="COMPLETED">Completed</option>
+                            <option value="CANCELLED">Cancelled</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group col-half">
+                        <label for="taskPrioritySelect">Priority</label>
+                        <select id="taskPrioritySelect" class="form-control">
+                            <option value="LOW">Low</option>
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="HIGH">High</option>
+                            <option value="URGENT">Urgent</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group col-half">
+                        <label for="taskCategoryInput">Category / Module</label>
+                        <input type="text" id="taskCategoryInput" class="form-control" placeholder="e.g., Backend, SOA, DevOps" list="categoriesDatalist" maxlength="50">
+                        <datalist id="categoriesDatalist"></datalist>
+                    </div>
+
+                    <div class="form-group col-half">
+                        <label for="taskDueDateInput">Due Date</label>
+                        <input type="date" id="taskDueDateInput" class="form-control">
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="modalCancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="modalSaveBtn">Save Task</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- REST API Playground Modal -->
+    <div class="modal-overlay hidden" id="apiModalOverlay">
+        <div class="modal-dialog modal-large">
+            <div class="modal-header">
+                <div>
+                    <h3>SOA REST API Specification & Explorer</h3>
+                    <p class="modal-subtitle">Direct live interactive access to Spring Boot endpoints on port 8090</p>
+                </div>
+                <button class="modal-close-btn" id="apiModalCloseBtn">&times;</button>
+            </div>
+            <div class="modal-body api-explorer">
+                <div class="endpoints-list">
+                    <div class="endpoint-item active" data-endpoint="getAll">
+                        <span class="http-badge get">GET</span>
+                        <code>/api/tasks</code>
+                        <span class="ep-desc">List all tasks (filterable)</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="getSummary">
+                        <span class="http-badge get">GET</span>
+                        <code>/api/tasks/summary</code>
+                        <span class="ep-desc">Get metric statistics</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="postTask">
+                        <span class="http-badge post">POST</span>
+                        <code>/api/tasks</code>
+                        <span class="ep-desc">Create task with validation</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="patchStatus">
+                        <span class="http-badge patch">PATCH</span>
+                        <code>/api/tasks/{id}/status</code>
+                        <span class="ep-desc">Quick status transition</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="deleteTask">
+                        <span class="http-badge delete">DELETE</span>
+                        <code>/api/tasks/{id}</code>
+                        <span class="ep-desc">Remove task by ID</span>
+                    </div>
+                </div>
+
+                <div class="api-request-panel">
+                    <div class="api-toolbar">
+                        <div class="active-endpoint-display" id="activeEpDisplay">
+                            <span class="http-badge get" id="activeEpMethod">GET</span>
+                            <span class="active-url" id="activeEpUrl">http://localhost:8090/api/tasks</span>
+                        </div>
+                        <button class="btn btn-primary btn-sm" id="executeApiBtn">Execute Request</button>
+                    </div>
+
+                    <div class="api-body-wrapper" id="apiRequestBodyWrapper">
+                        <label>Request Body (JSON):</label>
+                        <textarea id="apiRequestBody" class="code-editor" rows="6" spellcheck="false"></textarea>
+                    </div>
+
+                    <div class="api-response-wrapper">
+                        <div class="response-header">
+                            <span>Response</span>
+                            <span class="response-status" id="apiResponseStatus">-</span>
+                        </div>
+                        <pre id="apiResponseBody" class="code-view">Click "Execute Request" to test endpoint...</pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
