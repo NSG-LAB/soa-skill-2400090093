@@ -26,6 +26,9 @@ public class User {
     @Column(unique = true)
     private Long githubId;
 
+    @Column(unique = true)
+    private String googleId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AuthProvider authProvider = AuthProvider.LOCAL;
@@ -87,6 +90,14 @@ public class User {
 
     public void setGithubId(Long githubId) {
         this.githubId = githubId;
+    }
+
+    public String getGoogleId() {
+        return googleId;
+    }
+
+    public void setGoogleId(String googleId) {
+        this.googleId = googleId;
     }
 
     public AuthProvider getAuthProvider() {

@@ -1,6 +1,3 @@
--- ===================================================
--- In-Lab Task Manager Microservice Database Setup
--- ===================================================
 
 CREATE DATABASE IF NOT EXISTS task_db;
 USE task_db;

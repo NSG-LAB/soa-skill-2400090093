@@ -16,38 +16,70 @@ public class OAuth2Config {
     private static final Logger logger = LoggerFactory.getLogger(OAuth2Config.class);
 
     @Value("${github.client.id:}")
-    private String clientId;
+    private String githubClientId;
 
     @Value("${github.client.secret:}")
-    private String clientSecret;
+    private String githubClientSecret;
 
     @Value("${github.client.callback-url:http://localhost:8080/login/oauth2/code/github}")
-    private String callbackUrl;
+    private String githubCallbackUrl;
+
+    @Value("${google.client.id:}")
+    private String googleClientId;
+
+    @Value("${google.client.secret:}")
+    private String googleClientSecret;
+
+    @Value("${google.client.callback-url:http://localhost:8080/login/oauth2/code/google}")
+    private String googleCallbackUrl;
 
     @Bean
     public ClientRegistrationRepository clientRegistrationRepository() {
-        String effectiveClientId = (clientId != null && !clientId.isBlank()) ? clientId : "dummy-github-client-id";
-        String effectiveClientSecret = (clientSecret != null && !clientSecret.isBlank()) ? clientSecret : "dummy-github-client-secret";
+        String effectiveGithubClientId = (githubClientId != null && !githubClientId.isBlank()) ? githubClientId : "dummy-github-client-id";
+        String effectiveGithubClientSecret = (githubClientSecret != null && !githubClientSecret.isBlank()) ? githubClientSecret : "dummy-github-client-secret";
 
-        if (clientId == null || clientId.isBlank()) {
+        if (githubClientId == null || githubClientId.isBlank()) {
             logger.warn("GitHub OAuth running with dummy credentials (GITHUB_CLIENT_ID not set)");
         } else {
             logger.info("GitHub OAuth enabled");
         }
 
         ClientRegistration github = ClientRegistration.withRegistrationId("github")
-                .clientId(effectiveClientId)
-                .clientSecret(effectiveClientSecret)
+                .clientId(effectiveGithubClientId)
+                .clientSecret(effectiveGithubClientSecret)
                 .scope("read:user", "user:email")
                 .authorizationUri("https://github.com/login/oauth/authorize")
                 .tokenUri("https://github.com/login/oauth/access_token")
                 .userInfoUri("https://api.github.com/user")
                 .userNameAttributeName("login")
-                .redirectUri(callbackUrl)
+                .redirectUri(githubCallbackUrl)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .clientName("GitHub")
                 .build();
 
-        return new InMemoryClientRegistrationRepository(github);
+        String effectiveGoogleClientId = (googleClientId != null && !googleClientId.isBlank()) ? googleClientId : "dummy-google-client-id";
+        String effectiveGoogleClientSecret = (googleClientSecret != null && !googleClientSecret.isBlank()) ? googleClientSecret : "dummy-google-client-secret";
+
+        if (googleClientId == null || googleClientId.isBlank()) {
+            logger.warn("Google OAuth running with dummy credentials (GOOGLE_CLIENT_ID not set)");
+        } else {
+            logger.info("Google OAuth enabled");
+        }
+
+        ClientRegistration google = ClientRegistration.withRegistrationId("google")
+                .clientId(effectiveGoogleClientId)
+                .clientSecret(effectiveGoogleClientSecret)
+                .scope("openid", "profile", "email")
+                .authorizationUri("https://accounts.google.com/o/oauth2/v2/auth")
+                .tokenUri("https://oauth2.googleapis.com/token")
+                .userInfoUri("https://openidconnect.googleapis.com/v1/userinfo")
+                .jwkSetUri("https://www.googleapis.com/oauth2/v3/certs")
+                .userNameAttributeName("sub")
+                .redirectUri(googleCallbackUrl)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .clientName("Google")
+                .build();
+
+        return new InMemoryClientRegistrationRepository(github, google);
     }
 }

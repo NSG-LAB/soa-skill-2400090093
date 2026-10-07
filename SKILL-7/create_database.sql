@@ -18,6 +18,7 @@ USE library_db;
 --     password VARCHAR(255),
 --     role VARCHAR(20) NOT NULL DEFAULT 'USER',
 --     github_id BIGINT UNIQUE,
+--     google_id VARCHAR(255) UNIQUE,
 --     auth_provider VARCHAR(20) NOT NULL DEFAULT 'LOCAL'
 -- );
 
